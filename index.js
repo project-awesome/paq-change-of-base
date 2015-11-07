@@ -75,14 +75,15 @@ module.exports.generate = function(randomStream, params) {
     var toRad = conversion.radix.to;      
     var from = numToConvert.toString(fromRad);
 
+    var question = {};
 
-	this.answer = numToConvert.toString(toRad);
+	question.answer = numToConvert.toString(toRad);
     if (spaceBinary)
-    	this.answer = module.exports.formatAnswer(this.answer, fromRad, toRad);
-    
-	this.question = module.exports.generateQuestionText(randomStream, from, fromRad, toRad, spaceBinary);
-	this.format = 'free-response';
-	
+    	question.answer = module.exports.formatAnswer(question.answer, fromRad, toRad);
+
+	question.question = module.exports.generateQuestionText(randomStream, from, fromRad, toRad, spaceBinary);
+	question.format = 'free-response';
+	return question;
 };
 
 	

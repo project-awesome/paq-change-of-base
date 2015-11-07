@@ -104,7 +104,7 @@ describe("generate(randomStream, params)", function() {
 	}
 	beforeEach(function() {
 		setupSandbox();
-		res = new paqChangeOfBaseFR.generate(randomStreamMock, paramsDouble);
+		res = paqChangeOfBaseFR.generate(randomStreamMock, paramsDouble);
 
 	});
 	afterEach(function() {
@@ -143,7 +143,7 @@ describe("generate(randomStream, params)", function() {
 					sandbox.restore();
 					setupSandbox();
 					getSpaceBinaryStub.returns(false);
-					res = new paqChangeOfBaseFR.generate(randomStreamMock, paramsDouble);
+					res = paqChangeOfBaseFR.generate(randomStreamMock, paramsDouble);
 					expect(toStringStub.withArgs(toRadDouble).calledOnce).to.be.true;
 					expect(res.answer).to.equal(answerDouble);
 				});
@@ -153,7 +153,7 @@ describe("generate(randomStream, params)", function() {
 					sandbox.restore();
 					setupSandbox();
 					getSpaceBinaryStub.returns(true);
-					res = new paqChangeOfBaseFR.generate(randomStreamMock, paramsDouble);
+					res = paqChangeOfBaseFR.generate(randomStreamMock, paramsDouble);
 					expect(toStringStub.withArgs(toRadDouble).calledOnce).to.be.true;
 					expect(formatAnswerStub.withArgs(answerDouble, fromRadDouble, toRadDouble).calledOnce).to.be.true;
 					expect(res.answer).to.equal(formatDouble);
