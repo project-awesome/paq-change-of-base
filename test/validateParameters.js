@@ -1,5 +1,5 @@
-var chai = require("chai");
-var expect = chai.expect;
+var chai = require("chai"),
+    expect = chai.expect;
 
 var paqChangeOfBaseFR = require("../");
 
