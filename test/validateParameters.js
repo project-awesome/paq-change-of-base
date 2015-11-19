@@ -345,5 +345,4 @@ describe('validateParameters(parameters)', function() {
             });
         });
 	});
-
 });
