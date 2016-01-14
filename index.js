@@ -1,5 +1,11 @@
 module.exports.title = "Change of Base Free Response";
 
+Number.isSafeInteger = Number.isSafeInteger || function(n) {
+    return Math.round(n) == n &&
+        n < Math.pow(2, 53) &&
+        n > -Math.pow(2, 53);
+}
+
 module.exports.defaultConversions = [ 
     { radix:{ from: 10, to: 2 }, range:{ min: 0, max: 255} },
     { radix:{ from: 2, to: 10 }, range:{ min: 0, max: 255} },
