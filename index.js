@@ -39,24 +39,37 @@ module.exports.formatFrom = function(from, fromRad, toRad) {
     if (fromRad != 2 || (toRad != 8 && toRad != 16)) 
     	return from;
     var groupSize = (toRad == 8) ? 3 : 4;
-    return formatBinary(from, groupSize);
+    return module.exports.formatBinary(from, groupSize);
 }
 
 module.exports.formatAnswer = function(answer, fromRad, toRad) {
     if (toRad != 2 || (fromRad != 8 && fromRad != 16))
     	return answer;
     var groupSize = (fromRad == 8) ? 3 : 4;
-    return formatBinary(answer, groupSize);
+    return module.exports.formatBinary(answer, groupSize);
 }
 
-function nZeros(n) {
+module.exports.nZeros = function(n) {
+    if (typeof n != 'number' || !Number.isSafeInteger(n)) {
+        throw new TypeError("nonnegative integer expected");
+    }
+    if (n < 0) {
+        throw new RangeError("nonnegative integer expected");
+    }
     return Array(n+1).join("0");
 }
 
-function formatBinary(str, groupSize) {
-    if (str.length % groupSize != 0)
-        str = nZeros(groupSize - str.length % groupSize) + str;
-    return str.match(new RegExp('.{1,' + groupSize + '}', 'g')).join(" ");
+module.exports.formatBinary = function(str, groupSize) {
+    if (str.length == 0) {
+        return ""; // not handled automatically: regexp match returns null for no matches
+    }
+    if (groupSize == 0) {
+        return str;
+    }
+    if (str.length % groupSize != 0) {
+        str = module.exports.nZeros(groupSize - str.length % groupSize) + str;
+    }
+    return str.match(new RegExp('.{' + groupSize + '}', 'g')).join(" ");
 }
 
 
