@@ -102,6 +102,7 @@ module.exports.generate = function(randomStream, params) {
 
 	question.question = module.exports.generateQuestionText(randomStream, from, fromRad, toRad, spaceBinary);
 	question.format = 'free-response';
+    question.title = module.exports.title;
 	return question;
 };
 

@@ -115,6 +115,11 @@ describe("generate(randomStream, params)", function() {
 				expect(res.format).to.equal("free-response");
 			});
 		});
+        describe("title", function() {
+			it("should be the module.exports.title", function() {
+				expect(res.title).to.equal("Change of Base Free Response");
+			});
+		});
 	});
 });
 
