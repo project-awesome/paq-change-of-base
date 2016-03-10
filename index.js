@@ -1,4 +1,62 @@
-module.exports.title = "Change of Base Free Response";
+exports.title = "Change of Base Free Response";
+
+exports.paramSchema = {
+    title: 'fr-change-of-base',
+    type: 'object',
+    additionalProperties: false,
+    
+    properties: {
+        'conversions': {
+            type: 'array',
+            items: {
+                type: 'object',
+                required: ['radix', 'range'],
+                additionalProperties: false,
+                
+                properties: {
+                    'radix': {
+                        type: 'object',
+                        required: ['from', 'to'],
+                        additionalProperties: false,
+                        
+                        properties: {
+                            'from': {
+                                type: 'integer',
+                                minimum: 2,
+                                maximum: 36,
+                            },
+                            'to': {
+                                type: 'integer',
+                                minimum: 2,
+                                maximum: 36,
+                                not: {constant: {'$data': '1/from'}},
+                            },
+                        },
+                    },
+                    'range': {
+                        type: 'object',
+                        required: ['min', 'max'],
+                        additionalProperties: false,
+                        
+                        properties: {
+                            'min': {
+                                type: 'integer',
+                                minimum: 0,
+                            },
+                            'max': {
+                                type: 'integer',
+                                minimum: {'$data': '1/min'},
+                            },
+                        },
+                    },
+                },
+            },
+        },
+        'spaceBinary': {
+            type: 'boolean',
+        },
+    },
+};
 
 Number.isSafeInteger = Number.isSafeInteger || function(n) {
     return Math.round(n) == n &&
@@ -6,7 +64,7 @@ Number.isSafeInteger = Number.isSafeInteger || function(n) {
         n > -Math.pow(2, 53);
 }
 
-module.exports.defaultConversions = [ 
+exports.defaultConversions = [ 
     { radix:{ from: 10, to: 2 }, range:{ min: 0, max: 255} },
     { radix:{ from: 2, to: 10 }, range:{ min: 0, max: 255} },
     { radix:{ from: 2, to: 8 }, range:{ min: 0, max: 511 } },
@@ -15,7 +73,7 @@ module.exports.defaultConversions = [
     { radix:{ from: 16, to: 2 }, range:{ min: 0, max: 65535} } 
 ];
 
-module.exports.radixDescription = function (radix, useBase) {
+exports.radixDescription = function (radix, useBase) {
     if (useBase)
         return "base " + radix;
     switch(radix) {
@@ -28,28 +86,28 @@ module.exports.radixDescription = function (radix, useBase) {
 }
 
 
-module.exports.getConversion = function(randomStream, params, defaultValue) {
+exports.getConversion = function(randomStream, params, defaultValue) {
     var conversions = defaultValue;
     if (params && params.conversions && params.conversions.length > 0)
     	conversions = params.conversions;
     return randomStream.pick(conversions);
 }
 
-module.exports.formatFrom = function(from, fromRad, toRad) {
+exports.formatFrom = function(from, fromRad, toRad) {
     if (fromRad != 2 || (toRad != 8 && toRad != 16)) 
     	return from;
     var groupSize = (toRad == 8) ? 3 : 4;
-    return module.exports.formatBinary(from, groupSize);
+    return exports.formatBinary(from, groupSize);
 }
 
-module.exports.formatAnswer = function(answer, fromRad, toRad) {
+exports.formatAnswer = function(answer, fromRad, toRad) {
     if (toRad != 2 || (fromRad != 8 && fromRad != 16))
     	return answer;
     var groupSize = (fromRad == 8) ? 3 : 4;
-    return module.exports.formatBinary(answer, groupSize);
+    return exports.formatBinary(answer, groupSize);
 }
 
-module.exports.nZeros = function(n) {
+exports.nZeros = function(n) {
     if (typeof n != 'number' || !Number.isSafeInteger(n)) {
         throw new TypeError("nonnegative integer expected");
     }
@@ -59,7 +117,7 @@ module.exports.nZeros = function(n) {
     return Array(n+1).join("0");
 }
 
-module.exports.formatBinary = function(str, groupSize) {
+exports.formatBinary = function(str, groupSize) {
     if (str.length == 0) {
         return ""; // not handled automatically: regexp match returns null for no matches
     }
@@ -67,28 +125,28 @@ module.exports.formatBinary = function(str, groupSize) {
         return str;
     }
     if (str.length % groupSize != 0) {
-        str = module.exports.nZeros(groupSize - str.length % groupSize) + str;
+        str = exports.nZeros(groupSize - str.length % groupSize) + str;
     }
     return str.match(new RegExp('.{' + groupSize + '}', 'g')).join(" ");
 }
 
 
 
-module.exports.generateQuestionText = function (randomStream, from, fromRad, toRad, spaceBinary) {
-    var fromDesc = module.exports.radixDescription(fromRad, randomStream.nextIntRange(2));
-    var toDesc = module.exports.radixDescription(toRad, randomStream.nextIntRange(2));
+exports.generateQuestionText = function (randomStream, from, fromRad, toRad, spaceBinary) {
+    var fromDesc = exports.radixDescription(fromRad, randomStream.nextIntRange(2));
+    var toDesc = exports.radixDescription(toRad, randomStream.nextIntRange(2));
     if (spaceBinary)
-    	from = module.exports.formatFrom(from, fromRad, toRad);
+    	from = exports.formatFrom(from, fromRad, toRad);
     return "Convert " + from + " from " + fromDesc + " to " + toDesc + ".";
 }
 
-module.exports.getSpaceBinary = function(params) {
+exports.getSpaceBinary = function(params) {
 	return (params && 'spaceBinary' in params) ? params.spaceBinary : true;
 }
 
-module.exports.generate = function(randomStream, params) {
-	var conversion = module.exports.getConversion(randomStream, params, module.exports.defaultConversions);
-	var spaceBinary = module.exports.getSpaceBinary(params);
+exports.generate = function(randomStream, params) {
+	var conversion = exports.getConversion(randomStream, params, exports.defaultConversions);
+	var spaceBinary = exports.getSpaceBinary(params);
     var numToConvert = randomStream.randIntBetweenInclusive(conversion.range.min, conversion.range.max);
     var fromRad = conversion.radix.from;
     var toRad = conversion.radix.to;      
@@ -98,101 +156,13 @@ module.exports.generate = function(randomStream, params) {
 
 	question.answer = numToConvert.toString(toRad);
     if (spaceBinary)
-    	question.answer = module.exports.formatAnswer(question.answer, fromRad, toRad);
+    	question.answer = exports.formatAnswer(question.answer, fromRad, toRad);
 
-	question.question = module.exports.generateQuestionText(randomStream, from, fromRad, toRad, spaceBinary);
+	question.question = exports.generateQuestionText(randomStream, from, fromRad, toRad, spaceBinary);
 	question.format = 'free-response';
-    question.title = module.exports.title;
+    question.title = exports.title;
 	return question;
 };
-
-	
-
-module.exports.validateParameters = function(params) {var errors = [];
-    if (params === undefined) return [];
-    if (typeof params !== 'object') return [{ type: 'ExpectedObjectError', path: []}];
-
-    // spaceBinary validation
-    if ('spaceBinary' in params) {
-        if (params.spaceBinary !== true && params.spaceBinary !== false)
-            errors.unshift({ type: 'ExpectedBooleanError', path: ['spaceBinary']});
-    }
-    
-    // conversions validation
-    if ('conversions' in params) {
-        if (!Array.isArray(params.conversions)) {
-            errors.unshift({ type: 'ExpectedArrayError', path: ['conversions']});
-        } else {
-            for (var i = 0; params.conversions.length > i; i++) {
-                var conversion = params.conversions[i];
-
-                if (!('radix' in conversion)) {
-                    errors.unshift({ type: 'RequiredError', path: ['conversions', i, 'radix']});
-                } else {
-                    // must be [2-10] | [16]
-                    if (!('from' in conversion.radix)) {
-                        errors.unshift({ type: 'RequiredError', path: ['conversions', i, 'radix', 'from']});
-                    } else {
-                        if (!(Number.isSafeInteger(conversion.radix.from))) 
-                            errors.unshift({ type: 'ExpectedIntegerError', path: ['conversions', i, 'radix', 'from']});
-                        if (conversion.radix.from < 2) 
-                            errors.unshift({ type: 'MinimumValueError', path: ['conversions', i, 'radix', 'from']});
-                        if (conversion.radix.from > 36)
-                            errors.unshift({ type: 'MaximumValueError', path: ['conversions', i, 'radix', 'from']});
-                    }
-
-                    if (!('to' in conversion.radix)) {
-                        errors.unshift({ type: 'RequiredError', path: ['conversions', i, 'radix', 'to']});
-                    } else {
-                        if (!(Number.isSafeInteger(conversion.radix.to))) 
-                            errors.unshift({ type: 'ExpectedIntegerError', path: ['conversions', i, 'radix', 'to']});
-                        if (conversion.radix.to < 2) 
-                            errors.unshift({ type: 'MinimumValueError', path: ['conversions', i, 'radix', 'to']});
-                        if (conversion.radix.to > 36)
-                            errors.unshift({ type: 'MaximumValueError', path: ['conversions', i, 'radix', 'to']});
-                    }
-
-                    if (('from' in conversion.radix) && ('to' in conversion.radix)) {
-                        if (conversion.radix.from === conversion.radix.to) {
-                            errors.unshift({ type: 'ToFromEqualError', path: ['conversions', i, 'radix']});
-                        }
-                    }
-                }
-
-                if (!('range' in conversion)) {
-                    errors.unshift({ type: 'RequiredError', path: ['conversions', i, 'range']});
-                } else {
-                    if (!('min' in conversion.range)) {
-                        errors.unshift({ type: 'RequiredError', path: ['conversions', i, 'range', 'min']});
-                    } else {
-                        if (!(Number.isSafeInteger(conversion.range.min))) 
-                            errors.unshift({ type: 'ExpectedIntegerError', path: ['conversions', i, 'range', 'min']});
-                        if (conversion.range.min < 0) 
-                            errors.unshift({ type: 'MinimumValueError', path: ['conversions', i, 'range', 'min']});
-                    }
-
-                    if (!('max' in conversion.range)) {
-                        errors.unshift({ type: 'RequiredError', path: ['conversions', i, 'range', 'max']});
-                    } else {
-                        if (!(Number.isSafeInteger(conversion.range.max))) 
-                            errors.unshift({ type: 'ExpectedIntegerError', path: ['conversions', i, 'range', 'max']});
-                        if (conversion.range.max < 0) 
-                            errors.unshift({ type: 'MinimumValueError', path: ['conversions', i, 'range', 'max']});
-                    }
-
-                    if (('max' in conversion.range) && ('min' in conversion.range)) {
-                        if (conversion.range.min > conversion.range.max) {
-                            errors.unshift({ type: 'InvalidIntervalError', path: ['conversions', i, 'range']});
-                        }
-                    }
-                }
-
-            }
-        }
-    }
-
-    return errors;
-}
 
 
 
