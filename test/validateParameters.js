@@ -3,68 +3,52 @@ var chai = require("chai"),
 
 var paqChangeOfBaseFR = require("../");
 
-describe('validateParameters(parameters)', function() {
-	var validateParameters;
-	before(function() {
-		validateParameters = paqChangeOfBaseFR.validateParameters;
-	});
-	it('should exist', function() {
-		expect(validateParameters).to.be.a('function');
-	});
-	describe('when parameters are undefined', function() {
-		it('should return an empty array', function() {
-			expect(validateParameters()).to.eql([]);
-		});
+
+describe('paramSchema', function() {
+    var schema = paqChangeOfBaseFR.paramSchema;
+
+    var validates = require('ajv')({
+        //useDefaults: true,
+        v5: true,
+        allErrors: true,
+        verbose: true,
+        format: 'full',
+    }).compile(schema);
+    var validateParameters = function(params) {
+        return validates(params) ? [] : validates.errors;
+    }
+
+	it('should be an object', function() {
+		expect(schema).to.be.an('object');
 	});
 	describe('when parameters is an empty object', function() {
-		it('should return an empty array', function() {
+		it('should be valid', function() {
 			expect(validateParameters({})).to.eql([]);
 		});
 	});
-	describe('when parameters is defined but not an object', function() {
-		var errors;
-		beforeEach(function() {
-			errors = validateParameters('string');
-		});
-		it('should return an array with one element', function() {
-			expect(errors.length).to.equal(1);
-		});
-		describe('error type', function() {
-			it('should equal ExpectedObjectError', function() {
-				expect(errors[0].type).to.equal('ExpectedObjectError');
-			});
-		});
-		describe('error path', function() {
-			it('should be an empty array', function() {
-				expect(errors[0].path).to.eql([]);
-			});
-		});
-	});
+
 	describe('spaceBinary', function() {
-        describe('valid cases', function() {
-            describe('when value is true', function() {
-                it('should return an empty array', function() {
-                	var errors = validateParameters({ spaceBinary: true });
-                    expect(errors).to.eql([]);
-                });
-            });
-            describe('when value is false', function() {
-                it('should return an empty array', function() {
-                	var errors = validateParameters({ spaceBinary: false });
-                    expect(errors).to.eql([]);
-                });
+        describe('when value is true', function() {
+            it('should be valid', function() {
+                var errors = validateParameters({ spaceBinary: true });
+                expect(errors).to.eql([]);
             });
         });
-        describe('invalid cases', function() {
-            describe('when typeof spaceBinary is not boolean', function() {
-                it('should give an ExpectedBooleanError for non booleans', function() {
-                	var errors = validateParameters({ spaceBinary: 'true' });
-                    expect(errors[0].type).to.equal('ExpectedBooleanError');
-                    expect(errors[0].path).to.eql(['spaceBinary']);
-                });
+        describe('when value is false', function() {
+            it('should be valid', function() {
+                var errors = validateParameters({ spaceBinary: false });
+                expect(errors).to.eql([]);
+            });
+        });
+        describe('when typeof spaceBinary is not boolean', function() {
+            it('should give a type error', function() {
+                var errors = validateParameters({spaceBinary: 'true'});
+                expect(errors.length).to.equal(1);
+                expect(errors[0].keyword).to.equal('type');
             });
         });
 	});
+
 	describe('conversions', function() {
 		var params = {};
         describe('valid conversions values', function() {
@@ -129,6 +113,7 @@ describe('validateParameters(parameters)', function() {
             });
             describe('when conversions is an empty array', function() {
                 it('should be valid', function() {
+                    params.conversions = [];
                     expect(validateParameters(params)).to.eql([]);
                 });
             });
@@ -136,13 +121,13 @@ describe('validateParameters(parameters)', function() {
 
         describe('invalid conversions values', function() {
             describe('when conversions is not an array', function() {
-                it('should return false', function() {
-                    var errors = validateParameters({ conversions: {}});
+                it('should give a type error', function() {
+                    var errors = validateParameters({conversions: {}});
 		            expect(errors.length).to.equal(1);
-	                expect(errors[0].type).to.equal('ExpectedArrayError');
-	                expect(errors[0].path).to.eql(['conversions']);
+	                expect(errors[0].keyword).to.equal('type');
                 });
             });
+
             describe('conversion properties', function() {
                 var params = {};
 
@@ -152,91 +137,82 @@ describe('validateParameters(parameters)', function() {
                             before(function() {
                                 params.conversions = [ { radix: {to: 10}, range:{min: 0, max: 10} } ];
                             });
-                            it('should contain a RequiredError', function() {
+                            it('should contain a required error', function() {
                                 var errors = validateParameters(params);
                                 expect(errors.length).to.equal(1);
-                                expect(errors[0].type).to.equal('RequiredError');
-                                expect(errors[0].path).to.eql(['conversions', 0, 'radix', 'from']);
+                                expect(errors[0].keyword).to.equal('required');
                             });
                         });
                         describe('when not an integer', function() {
                             before(function() {
                                 params.conversions = [ { radix: {from: 3.1, to: 10}, range:{min: 0, max: 10} } ];
                             });
-                            it('should contain a ExpectedIntegerError', function() {
+                            it('should contain a type error', function() {
                                 var errors = validateParameters(params);
                                 expect(errors.length).to.equal(1);
-                                expect(errors[0].type).to.equal('ExpectedIntegerError');
-                                expect(errors[0].path).to.eql(['conversions', 0, 'radix', 'from']);
+                                expect(errors[0].keyword).to.equal('type');
                             });
                         });
                         describe('when less than 2', function() {
                             before(function() {
                                 params.conversions = [ { radix: {from: 1, to: 10}, range:{min: 0, max: 10} } ];
                             });
-                            it('should contain a MinimumValueError', function() {
+                            it('should contain a minimum value error', function() {
                                 var errors = validateParameters(params);
                                 expect(errors.length).to.equal(1);
-                                expect(errors[0].type).to.equal('MinimumValueError');
-                                expect(errors[0].path).to.eql(['conversions', 0, 'radix', 'from']);
+                                expect(errors[0].keyword).to.equal('minimum');
                             });
                         });
                         describe('when greater than 36', function() {
                             before(function() {
                                 params.conversions = [ { radix: {from: 37, to: 10}, range:{min: 0, max: 10} } ];
                             });
-                            it('should contain a MaximumValueError', function() {
+                            it('should contain a maximum value error', function() {
                                 var errors = validateParameters(params);
                                 expect(errors.length).to.equal(1);
-                                expect(errors[0].type).to.equal('MaximumValueError');
-                                expect(errors[0].path).to.eql(['conversions', 0, 'radix', 'from']);
+                                expect(errors[0].keyword).to.equal('maximum');
                             });
                         });
                     });
-
                     describe('to', function() {
                         describe('when undefined', function() {
                             before(function() {
                                 params.conversions = [ { radix: {from: 2}, range:{min: 0, max: 10} } ];
                             });
-                            it('should contain a RequiredError', function() {
+                            it('should contain a required error', function() {
                                 var errors = validateParameters(params);
                                 expect(errors.length).to.equal(1);
-                                expect(errors[0].type).to.equal('RequiredError');
-                                expect(errors[0].path).to.eql(['conversions', 0, 'radix', 'to']);
+                                expect(errors[0].keyword).to.equal('required');
                             });
                         });
                         describe('when not an integer', function() {
                             before(function() {
                                 params.conversions = [ { radix: {from: 2, to: 9.1 }, range:{min: 0, max: 10} } ];
                             });
-                            it('should contain a ExpectedIntegerError', function() {
+                            it('should contain a type error', function() {
                                 var errors = validateParameters(params);
                                 expect(errors.length).to.equal(1);
-                                expect(errors[0].type).to.equal('ExpectedIntegerError');
-                                expect(errors[0].path).to.eql(['conversions', 0, 'radix', 'to']);
+                                expect(errors[0].keyword).to.equal('type');
                             });
                         });
                         describe('when less than 2', function() {
                             before(function() {
                                 params.conversions = [ { radix: {from: 2, to: 1 }, range:{min: 0, max: 10} } ];
                             });
-                            it('should contain a MinimumValueError', function() {
+                            it('should contain a minimum value error', function() {
                                 var errors = validateParameters(params);
                                 expect(errors.length).to.equal(1);
-                                expect(errors[0].type).to.equal('MinimumValueError');
-                                expect(errors[0].path).to.eql(['conversions', 0, 'radix', 'to']);
+                                expect(errors[0].keyword).to.equal('minimum');
                             });
                         });
                         describe('when greater than 36', function() {
                             before(function() {
                                 params.conversions = [ { radix: {from: 2, to: 37 }, range:{min: 0, max: 10} } ];
                             });
-                            it('should contain a MaximumValueError', function() {
+                            it('should contain a maximum value error', function() {
                                 var errors = validateParameters(params);
                                 expect(errors.length).to.equal(1);
-                                expect(errors[0].type).to.equal('MaximumValueError');
-                                expect(errors[0].path).to.eql(['conversions', 0, 'radix', 'to']);
+                                expect(errors[0].keyword).to.equal('maximum');
                             });
                         });
                     });
@@ -245,13 +221,12 @@ describe('validateParameters(parameters)', function() {
                             before(function() {
                                 params.conversions = [ { radix: {from: 2, to: 2 }, range:{min: 0, max: 10} } ];
                             });
-                        it('should contain a ToFromEqualError', function() {
+                        it('should contain an error', function() {
                             var errors = validateParameters(params);
                             expect(errors.length).to.equal(1);
-                            expect(errors[0].type).to.equal('ToFromEqualError');
-                            expect(errors[0].path).to.eql(['conversions', 0, 'radix']);
                         });
                     });
+                    
                 });
                 
                 describe('range', function() {
@@ -260,33 +235,30 @@ describe('validateParameters(parameters)', function() {
                             before(function() {
                                 params.conversions = [ { radix: {from: 2, to: 10 }, range:{max: 10} } ];
                             });
-                            it('should contain a RequiredError', function() {
+                            it('should contain a required error', function() {
                                 var errors = validateParameters(params);
                                 expect(errors.length).to.equal(1);
-                                expect(errors[0].type).to.equal('RequiredError');
-                                expect(errors[0].path).to.eql(['conversions', 0, 'range', 'min']);
+                                expect(errors[0].keyword).to.equal('required');
                             });
                         });
                         describe('when not an integer', function() {
                             before(function() {
                                 params.conversions = [ { radix: {from: 2, to: 10 }, range:{ min: 1.1, max: 10} } ];
                             });
-                            it('should contain a ExpectedIntegerError', function() {
+                            it('should contain a type error', function() {
                                 var errors = validateParameters(params);
                                 expect(errors.length).to.equal(1);
-                                expect(errors[0].type).to.equal('ExpectedIntegerError');
-                                expect(errors[0].path).to.eql(['conversions', 0, 'range', 'min']);
+                                expect(errors[0].keyword).to.equal('type');
                             });
                         });
                         describe('when less than 0', function() {
                             before(function() {
                                 params.conversions = [ { radix: {from: 2, to: 10 }, range:{ min: -1, max: 10} } ];
                             });
-                            it('should contain a MinimumValueError', function() {
+                            it('should contain a minimum value error', function() {
                                 var errors = validateParameters(params);
                                 expect(errors.length).to.equal(1);
-                                expect(errors[0].type).to.equal('MinimumValueError');
-                                expect(errors[0].path).to.eql(['conversions', 0, 'range', 'min']);
+                                expect(errors[0].keyword).to.equal('minimum');
                             });
                         });
                     });
@@ -296,52 +268,45 @@ describe('validateParameters(parameters)', function() {
                             before(function() {
                                 params.conversions = [ { radix: {from: 2, to: 10 }, range:{ min: 0 } } ];
                             });
-                            it('should contain a RequiredError', function() {
+                            it('should contain a required error', function() {
                                 var errors = validateParameters(params);
                                 expect(errors.length).to.equal(1);
-                                expect(errors[0].type).to.equal('RequiredError');
-                                expect(errors[0].path).to.eql(['conversions', 0, 'range', 'max']);
+                                expect(errors[0].keyword).to.equal('required');
                             });
                         });
                         describe('when not an integer', function() {
                             before(function() {
                                 params.conversions = [ { radix: {from: 2, to: 10 }, range:{ min: 0, max: 10.1 } } ];
                             });
-                            it('should contain a ExpectedIntegerError', function() {
+                            it('should contain a type error', function() {
                                 var errors = validateParameters(params);
                                 expect(errors.length).to.equal(1);
-                                expect(errors[0].type).to.equal('ExpectedIntegerError');
-                                expect(errors[0].path).to.eql(['conversions', 0, 'range', 'max']);
+                                expect(errors[0].keyword).to.equal('type');
                             });
                         });
                         describe('when less than 0', function() {
                             before(function() {
                                 params.conversions = [ { radix: {from: 2, to: 10 }, range:{ min: 0, max: -1 } } ];
                             });
-                            it('should contain a MinimumValueError and an InvalidIntervalError', function() {
+                            it('should contain a minimum value error', function() {
                                 var errors = validateParameters(params);
-                                expect(errors.length).to.equal(2);
-                                expect(errors[0].type).to.equal('InvalidIntervalError');
-                                expect(errors[0].path).to.eql(['conversions', 0, 'range']);
-                                expect(errors[1].type).to.equal('MinimumValueError');
-                                expect(errors[1].path).to.eql(['conversions', 0, 'range', 'max']);
+                                expect(errors.length).to.equal(1);
+                                expect(errors[0].keyword).to.equal('minimum');
                             });
                         });
                     });
-
                     describe('when range.max is less than range.min', function() {
                         before(function() {
-                                params.conversions = [ { radix: {from: 2, to: 10 }, range:{ min: 10, max: 5 } } ];
+                            params.conversions = [ { radix: {from: 2, to: 10 }, range:{ min: 10, max: 5 } } ];
                         });
-                        it('should contain a InvalidIntervalError', function() {
+                        it('should contain a minimum value error', function() {
                             var errors = validateParameters(params);
-                                expect(errors.length).to.equal(1);
-                            expect(errors[0].type).to.equal('InvalidIntervalError');
-                            expect(errors[0].path).to.eql(['conversions', 0, 'range']);
+                            expect(errors.length).to.equal(1);
+                            expect(errors[0].keyword).to.equal('minimum');
                         });
                     });
+                    
                 });
-
             });
         });
 	});
