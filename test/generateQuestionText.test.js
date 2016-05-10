@@ -4,6 +4,37 @@ var chai = require("chai"),
 
 var paqChangeOfBaseFR = require("../");
 
+
+describe("generateQuestionText(qInputs)", function() {
+	it('should generate the correct question text', function() {
+		var qInputs = {
+	        spaceBinary : false,
+	        numToConvert : 5,
+	        fromRad : 2,
+	        toRad : 10,     
+	        fromDesc : "binary",
+	        toDesc : "decimal"
+	    };
+		var res = paqChangeOfBaseFR.generateQuestionText(qInputs);
+		expect(res).to.eql("Convert 101 from binary to decimal.");
+	});
+
+	it('should generate the correct question text', function() {
+		var qInputs = {
+	        spaceBinary : true,
+	        numToConvert : 16,
+	        fromRad : 2,
+	        toRad : 16,
+	        fromDesc : "base 2",
+	        toDesc : "base 16"
+	    };
+		var res = paqChangeOfBaseFR.generateQuestionText(qInputs);
+		expect(res).to.eql("Convert 0001 0000 from base 2 to base 16.");
+	});
+
+});
+
+/*
 describe("generateQuestionText(randomStream, from, fromRad, toRad, spaceBinary)", function() {
 	var res;
 	var randomStreamMock;
@@ -68,3 +99,9 @@ describe("generateQuestionText(randomStream, from, fromRad, toRad, spaceBinary)"
 	});
 
 });
+
+*/
+
+
+
+

@@ -132,35 +132,49 @@ exports.formatBinary = function(str, groupSize) {
 
 
 
-exports.generateQuestionText = function (randomStream, from, fromRad, toRad, spaceBinary) {
-    var fromDesc = exports.radixDescription(fromRad, randomStream.nextIntRange(2));
-    var toDesc = exports.radixDescription(toRad, randomStream.nextIntRange(2));
-    if (spaceBinary)
-    	from = exports.formatFrom(from, fromRad, toRad);
-    return "Convert " + from + " from " + fromDesc + " to " + toDesc + ".";
+exports.generateQuestionText = function (qInputs){ // fromRad, toRad, spaceBinary, fromDesc, toDesc
+    var numToConvertInFromRadix = qInputs.numToConvert.toString(qInputs.fromRad);
+    if (qInputs.spaceBinary)
+    	numToConvertInFromRadix = 
+            exports.formatFrom(numToConvertInFromRadix, qInputs.fromRad, qInputs.toRad);
+    return "Convert " + numToConvertInFromRadix + " from " + qInputs.fromDesc + " to " + qInputs.toDesc + ".";
 }
 
 exports.getSpaceBinary = function(params) {
 	return (params && 'spaceBinary' in params) ? params.spaceBinary : true;
 }
 
-exports.generate = function(randomStream, params) {
-	var conversion = exports.getConversion(randomStream, params, exports.defaultConversions);
-	var spaceBinary = exports.getSpaceBinary(params);
-    var numToConvert = randomStream.randIntBetweenInclusive(conversion.range.min, conversion.range.max);
+exports.generateQInputs = function(randomStream, params) {
+    var conversion = exports.getConversion(randomStream, params, exports.defaultConversions);
+
     var fromRad = conversion.radix.from;
-    var toRad = conversion.radix.to;      
-    var from = numToConvert.toString(fromRad);
+    var toRad = conversion.radix.to;
+    var qInputs = {
+        spaceBinary : exports.getSpaceBinary(params),
+        numToConvert : randomStream.randIntBetweenInclusive(conversion.range.min, conversion.range.max),
+        fromRad : fromRad,
+        toRad : toRad,     
+        fromDesc : exports.radixDescription(fromRad, randomStream.nextIntRange(2)),
+        toDesc : exports.radixDescription(toRad, randomStream.nextIntRange(2))
+    };
+    return qInputs;
+}
 
-    var question = {};
+exports.generateAnswer = function(qInputs) {
+    var answer = qInputs.numToConvert.toString(qInputs.toRad);
+    if (qInputs.spaceBinary)
+        answer = exports.formatAnswer(answer, qInputs.fromRad, qInputs.toRad);
+    return answer;
+}
 
-	question.answer = numToConvert.toString(toRad);
-    if (spaceBinary)
-    	question.answer = exports.formatAnswer(question.answer, fromRad, toRad);
-
-	question.question = exports.generateQuestionText(randomStream, from, fromRad, toRad, spaceBinary);
-	question.format = 'free-response';
-    question.title = exports.title;
+exports.generate = function(randomStream, params) {
+    var qInputs = exports.generateQInputs(randomStream, params);
+    var question = {
+        title : exports.title,
+        format : 'free-response',
+        question : exports.generateQuestionText(qInputs),
+        answer : exports.generateAnswer(qInputs)
+    };
 	return question;
 };
 
