@@ -1,7 +1,7 @@
-exports.title = "Change of Base Free Response";
+exports.title = "Change of Base";
 
 exports.paramSchema = {
-    title: 'fr-change-of-base',
+    title: 'change-of-base',
     type: 'object',
     additionalProperties: false,
     
