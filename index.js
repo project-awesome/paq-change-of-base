@@ -4,8 +4,9 @@ exports.paramSchema = {
     title: 'change-of-base',
     type: 'object',
     additionalProperties: false,
-    
     properties: {
+        "outputType": { "type": "string"},
+        "points": {"type": "number"},
         'conversions': {
             type: 'array',
             items: {
@@ -58,12 +59,8 @@ exports.paramSchema = {
     },
 };
 
-Number.isSafeInteger = Number.isSafeInteger || function(n) {
-    return Math.round(n) == n &&
-        n < Math.pow(2, 53) &&
-        n > -Math.pow(2, 53);
-}
-
+exports.defaultOutputType = "fr";
+exports.defaultPoints = 1;
 exports.defaultConversions = [ 
     { radix:{ from: 10, to: 2 }, range:{ min: 0, max: 255} },
     { radix:{ from: 2, to: 10 }, range:{ min: 0, max: 255} },
@@ -72,6 +69,12 @@ exports.defaultConversions = [
     { radix:{ from: 2, to: 16 }, range:{ min: 0, max: 65535} },
     { radix:{ from: 16, to: 2 }, range:{ min: 0, max: 65535} } 
 ];
+
+Number.isSafeInteger = Number.isSafeInteger || function(n) {
+    return Math.round(n) == n &&
+        n < Math.pow(2, 53) &&
+        n > -Math.pow(2, 53);
+}
 
 exports.radixDescription = function (radix, useBase) {
     if (useBase)
@@ -160,6 +163,10 @@ exports.generateQInputs = function(randomStream, params) {
     return qInputs;
 }
 
+exports.generatesOutputType = function(params) {
+	return (params && "outputType" in params) ? params.outputType : exports.defaultOutputType);
+};
+
 exports.generateAnswer = function(qInputs) {
     var answer = qInputs.numToConvert.toString(qInputs.toRad);
     if (qInputs.spaceBinary)
@@ -168,15 +175,23 @@ exports.generateAnswer = function(qInputs) {
 }
 
 exports.generate = function(randomStream, params) {
+    // later add code to validate schema for params and if invalid, then set errors
+    // or warnings? 
     var qInputs = exports.generateQInputs(randomStream, params);
     var question = {
-        title : exports.title,
-        format : 'free-response',
-        question : exports.generateQuestionText(qInputs),
-        answer : exports.generateAnswer(qInputs)
+        "outputType": exports.generateOutputType,
+        "problemType": "paq-change-of-base",
+        "points": (params & "points" in params) ? params.points: 1), 
+        "questionText" : exports.generateQuestionText(qInputs),
+        "answer" : exports.generateAnswer(qInputs)
     };
+    // more work needs to be done here -- This code must exist in paq-mc-change-of-base
+    // for now do dumb generation of incorrect distractors
+    if (questions.outputType == "mc") {
+        question.disractors = [question.answer, "distractor", "distractor", "distractor"];
+        question.answerIndex = 0;
+    }
+
 	return question;
 };
-
-
 
