@@ -163,7 +163,7 @@ exports.generateQInputs = function(randomStream, params) {
     return qInputs;
 }
 
-exports.generatesOutputType = function(params) {
+exports.generateOutputType = function(params) {
 	return (params && "outputType" in params) ? params.outputType : exports.defaultOutputType;
 };
 
@@ -176,7 +176,7 @@ exports.generateAnswer = function(qInputs) {
 
 exports.generate = function(randomStream, params) {
     // later add code to validate schema for params and if invalid, then set errors
-    // or warnings? 
+    // or warnings within the question ? 
     var qInputs = exports.generateQInputs(randomStream, params);
     var question = {
         "outputType": exports.generateOutputType,
