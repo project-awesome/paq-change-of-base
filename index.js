@@ -187,7 +187,7 @@ exports.generate = function(randomStream, params) {
     };
     // more work needs to be done here -- This code must exist in paq-mc-change-of-base
     // for now do dumb generation of incorrect distractors
-    if (questions.outputType == "mc") {
+    if (question.outputType == "mc") {
         question.disractors = [question.answer, "distractor", "distractor", "distractor"];
         question.answerIndex = 0;
     }
