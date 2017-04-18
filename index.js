@@ -164,7 +164,7 @@ exports.generateQInputs = function(randomStream, params) {
 }
 
 exports.generatesOutputType = function(params) {
-	return (params && "outputType" in params) ? params.outputType : exports.defaultOutputType);
+	return (params && "outputType" in params) ? params.outputType : exports.defaultOutputType;
 };
 
 exports.generateAnswer = function(qInputs) {
