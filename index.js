@@ -181,7 +181,7 @@ exports.generate = function(randomStream, params) {
     var question = {
         "outputType": exports.generateOutputType,
         "problemType": "paq-change-of-base",
-        "points": (params & "points" in params) ? params.points: 1), 
+        "points": ((params & "points" in params) ? params.points: 1), 
         "questionText" : exports.generateQuestionText(qInputs),
         "answer" : exports.generateAnswer(qInputs)
     };
