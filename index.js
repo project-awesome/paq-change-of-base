@@ -59,7 +59,7 @@ exports.paramSchema = {
     },
 };
 
-exports.defaultOutputType = "mc";
+exports.defaultOutputType = "fr";
 exports.defaultPoints = 1;
 exports.defaultConversions = [ 
     { radix:{ from: 10, to: 2 }, range:{ min: 0, max: 255} },
@@ -175,14 +175,14 @@ exports.generateAnswer = function(qInputs) {
     return answer;
 }
 
-exports.generate = function(randomStream, params) {
+exports.generate = function(randomStream, quizElement) {
     // later add code to validate schema for params and if invalid, then set errors
     // or warnings within the question ? 
-    var qInputs = exports.generateQInputs(randomStream, params);
+    var qInputs = exports.generateQInputs(randomStream, quizElement.params);
     var question = {
-        "outputType": exports.generateOutputType(params),
+        "outputType": exports.generateOutputType(quizElement.params),
         "problemType": "paq-change-of-base",
-        "points": ((params & "points" in params) ? params.points: 1), 
+        "points": ((quizElement & "points" in quizElement) ? quizElement.points: 1), 
         "questionText" : exports.generateQuestionText(qInputs),
         "answer" : exports.generateAnswer(qInputs)
     };
