@@ -179,7 +179,7 @@ exports.generate = function(randomStream, params) {
     // or warnings within the question ? 
     var qInputs = exports.generateQInputs(randomStream, params);
     var question = {
-        "outputType": exports.generateOutputType,
+        "outputType": exports.generateOutputType(params),
         "problemType": "paq-change-of-base",
         "points": ((params & "points" in params) ? params.points: 1), 
         "questionText" : exports.generateQuestionText(qInputs),
