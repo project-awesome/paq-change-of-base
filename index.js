@@ -59,7 +59,7 @@ exports.paramSchema = {
     },
 };
 
-exports.defaultOutputType = "custom";
+exports.defaultOutputType = "mc";
 exports.defaultPoints = 1;
 exports.defaultConversions = [ 
     { radix:{ from: 10, to: 2 }, range:{ min: 0, max: 255} },
@@ -164,7 +164,8 @@ exports.generateQInputs = function(randomStream, params) {
 }
 
 exports.generateOutputType = function(params) {
-	return (params && "outputType" in params) ? params.outputType : exports.defaultOutputType;
+    console.log("params are "+ JSON.stringify(params));
+	return (params && ("outputType" in params)) ? params.outputType : exports.defaultOutputType;
 };
 
 exports.generateAnswer = function(qInputs) {
