@@ -59,7 +59,7 @@ exports.paramSchema = {
     },
 };
 
-exports.defaultOutputType = "fr";
+exports.defaultOutputType = "custom";
 exports.defaultPoints = 1;
 exports.defaultConversions = [ 
     { radix:{ from: 10, to: 2 }, range:{ min: 0, max: 255} },
