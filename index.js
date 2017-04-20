@@ -148,8 +148,10 @@ exports.getSpaceBinary = function(params) {
 }
 
 exports.generateQInputs = function(randomStream, params) {
+    console.log("1: "+ json.stringify(params));
     var conversion = exports.getConversion(randomStream, params, exports.defaultConversions);
 
+    console.log("2: "+ json.stringify(params));
     var fromRad = conversion.radix.from;
     var toRad = conversion.radix.to;
     var qInputs = {
@@ -182,6 +184,7 @@ exports.generate = function(randomStream, quizElement) {
     var question = {
         "outputType": exports.generateOutputType(quizElement.params),
         "problemType": "paq-change-of-base",
+        // XXX fix this since points are now optional rather than defaulting to 1 in question
         "points": ((quizElement & "points" in quizElement) ? quizElement.points: 1), 
         "questionText" : exports.generateQuestionText(qInputs),
         "answer" : exports.generateAnswer(qInputs)
