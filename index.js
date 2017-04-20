@@ -148,7 +148,7 @@ exports.getSpaceBinary = function(params) {
 }
 
 exports.generateQInputs = function(randomStream, params) {
-    console.log("1: "+ json.stringify(params));
+    console.log("1: "+ JSON.stringify(params));
     var conversion = exports.getConversion(randomStream, params, exports.defaultConversions);
 
     console.log("2: "+ json.stringify(params));
