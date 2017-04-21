@@ -148,10 +148,8 @@ exports.getSpaceBinary = function(params) {
 }
 
 exports.generateQInputs = function(randomStream, params) {
-    console.log("1: "+ JSON.stringify(params));
     var conversion = exports.getConversion(randomStream, params, exports.defaultConversions);
 
-    console.log("2: "+ JSON.stringify(conversion));
     var fromRad = conversion.radix.from;
     var toRad = conversion.radix.to;
     var qInputs = {
@@ -166,7 +164,6 @@ exports.generateQInputs = function(randomStream, params) {
 }
 
 exports.generateOutputType = function(params) {
-    console.log("params are "+ JSON.stringify(params));
 	return (params && ("outputType" in params)) ? params.outputType : exports.defaultOutputType;
 };
 
