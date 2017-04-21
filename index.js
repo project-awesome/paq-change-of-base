@@ -1,4 +1,5 @@
 exports.title = "Change of Base";
+var paqUtils = require("./paq-utils");
 
 exports.paramSchema = {
     title: 'change-of-base',
@@ -110,6 +111,14 @@ exports.formatAnswer = function(answer, fromRad, toRad) {
     return exports.formatBinary(answer, groupSize);
 }
 
+exports.formatChoices = function(choices, fromRad, toRad, spaceBinary) {
+	if (!spaceBinary) return;
+	choices.forEach(function(choice, i, arr) {
+		arr[i] = exports.formatAnswer(choice, fromRad, toRad);
+	});
+}
+
+
 exports.nZeros = function(n) {
     if (typeof n != 'number' || !Number.isSafeInteger(n)) {
         throw new TypeError("nonnegative integer expected");
@@ -173,6 +182,55 @@ exports.generateAnswer = function(qInputs) {
         answer = exports.formatAnswer(answer, qInputs.fromRad, qInputs.toRad);
     return answer;
 }
+/////////////// supporting functions for generating distractors for MC version ///////
+exports.getDistractorRadices = function(rad) {
+	var distractorRadices = {
+    	"8" : [10,16],
+    	"10" : [8,16],
+    	"16" : [8,10]
+	};
+	return (rad in distractorRadices) ? distractorRadices[rad] : [];
+}
+
+exports.generateFromRadDistractors = function (fromRad, toRad, numToConvert, from) {
+	var result = [];
+	// If fromRad is in distractor radices, try interpreting the number in a different
+	// radix than the intended one.   If the number we are converting is legit in that base,
+	// convert from that number, correcttly, to the toRadix and try adding that as a distractor
+	var distractorRadices = exports.getDistractorRadices(fromRad);
+	distractorRadices.forEach(function(thisRad) {
+		// can the string "from" be legally intepreted as a number in thisRad?
+		// if so, then try to distract the student with that number correctly converted to the toRad
+		var wrongInterpretationOfFrom = parseInt(from,thisRad);
+		if (!isNaN(wrongInterpretationOfFrom)) {
+			var badAnswer = wrongInterpretationOfFrom.toString(toRad);
+			result.push(badAnswer);
+		}
+	});
+	return result;
+}
+
+exports.generateToRadDistractors = function(toRad, numToConvert) {
+	var distractorRadices = exports.getDistractorRadices(toRad);
+	return distractorRadices.map(function(dRad) {
+		return numToConvert.toString(dRad);
+	});
+}
+
+exports.addDistractorChoices = function(answerChoices, fromRad, toRad, from, numToConvert) {
+	// If toRad is in distractor radices, try adding the right answer in a wrong radix to the list.
+	answerChoices.addAll(exports.generateToRadDistractors(toRad, numToConvert));
+	answerChoices.addAll(exports.generateFromRadDistractors(fromRad, toRad, numToConvert, from));
+}
+
+exports.addRandomChoices = function(randomStream, answerChoices, toRad, min, max) {
+	while (!answerChoices.full()) {
+		var distractor = randomStream.randIntBetweenInclusive(min, max);
+		answerChoices.add(distractor.toString(toRad));
+	}
+}
+
+///////////////
 
 exports.generate = function(randomStream, quizElement) {
     // later add code to validate schema for params and if invalid, then set errors
@@ -189,8 +247,23 @@ exports.generate = function(randomStream, quizElement) {
     // more work needs to be done here -- This code must exist in paq-mc-change-of-base
     // for now do dumb generation of incorrect distractors
     if (question.outputType == "mc") {
-        question.distractors = [question.answer, "distractor", "distractor", "distractor"];
-        question.answerIndex = 0;
+      var from = qInputs.numToConvert.toString(qInputs.fromRad);
+      var answerAsString = qInputs.numToConvert.toString(qInputs.toRad);
+      var answerChoices = new paqUtils.UniqueChoices(5);
+      answerChoices.add(answerAsString);
+
+      exports.addDistractorChoices(answerChoices, qInputs.fromRad, qInputs.toRad, 
+                                   from, qInputs.numToConvert);
+
+      exports.addRandomChoices(randomStream, answerChoices, qInputs.toRad,
+			                   qInputs.conversion.range.min, qInputs.conversion.range.max);
+    
+      var choices = answerChoices.getChoices();
+      randomStream.shuffle(choices);
+
+      exports.formatChoices(question.choices, qInputs.fromRad, qInputs.toRad, qInputs.spaceBinary);
+      question.distractors = choices;
+      question.answerIndex =  choices.indexOf(answerAsString);
     }
 
 	return question;
