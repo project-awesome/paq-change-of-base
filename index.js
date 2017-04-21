@@ -262,7 +262,7 @@ exports.generate = function(randomStream, quizElement) {
       var choices = answerChoices.getChoices();
       randomStream.shuffle(choices);
 
-      exports.formatChoices(question.choices, qInputs.fromRad, qInputs.toRad, qInputs.spaceBinary);
+      exports.formatChoices(choices, qInputs.fromRad, qInputs.toRad, qInputs.spaceBinary);
       question.distractors = choices;
       question.answerIndex =  choices.indexOf(answerAsString);
     }
