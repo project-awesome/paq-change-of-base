@@ -162,6 +162,7 @@ exports.generateQInputs = function(randomStream, params) {
     var fromRad = conversion.radix.from;
     var toRad = conversion.radix.to;
     var qInputs = {
+        "conversion" : conversion,
         spaceBinary : exports.getSpaceBinary(params),
         numToConvert : randomStream.randIntBetweenInclusive(conversion.range.min, conversion.range.max),
         fromRad : fromRad,
