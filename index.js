@@ -7,7 +7,6 @@ exports.paramSchema = {
     additionalProperties: false,
     properties: {
         "outputType": { "type": "string"},
-        "points": {"type": "number"},
         'conversions': {
             type: 'array',
             items: {
@@ -240,13 +239,17 @@ exports.generate = function(randomStream, quizElement) {
     var question = {
         "outputType": exports.generateOutputType(quizElement.params),
         "problemType": "paq-change-of-base",
-        // XXX fix this since points are now optional rather than defaulting to 1 in question
-        "points": ((quizElement & "points" in quizElement) ? quizElement.points: 1), 
         "questionText" : exports.generateQuestionText(qInputs),
         "answer" : exports.generateAnswer(qInputs)
     };
-    // more work needs to be done here -- This code must exist in paq-mc-change-of-base
-    // for now do dumb generation of incorrect distractors
+    if (quizElement & "points" in quizElement) {
+       question.points = quizElement.points; 
+    }
+    if (quizElement & "title" in quizElement) {
+       question.title = quizElement.problemType + " " + quizElement.outputType; 
+    }
+
+    // fr is done but there is more work to do to generate distractors for mc
     if (question.outputType == "mc") {
       var from = qInputs.numToConvert.toString(qInputs.fromRad);
       var answerAsString = qInputs.numToConvert.toString(qInputs.toRad);
