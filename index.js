@@ -242,10 +242,12 @@ exports.generate = function(randomStream, quizElement) {
         "questionText" : exports.generateQuestionText(qInputs),
         "answer" : exports.generateAnswer(qInputs)
     };
-    if (quizElement & "points" in quizElement) {
+    if ("points" in quizElement) {
        question.points = quizElement.points; 
     }
-    if (quizElement & "title" in quizElement) {
+    if ("title" in quizElement) {
+       question.title = quizElement.title;
+    } else {
        question.title = quizElement.problemType + " " + quizElement.outputType; 
     }
 
