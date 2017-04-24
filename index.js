@@ -248,7 +248,9 @@ exports.generate = function(randomStream, quizElement) {
     if ("title" in quizElement) {
        question.title = quizElement.title;
     } else {
-       question.title = quizElement.problemType + " " + quizElement.outputType; 
+       // the question generating module can optionally supply the title
+       // If this is not done, MoodleExporter will make up a title.
+       question.title = quizElement.problemType; 
     }
 
     // fr is done but there is more work to do to generate distractors for mc
