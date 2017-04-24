@@ -250,7 +250,7 @@ exports.generate = function(randomStream, quizElement) {
     } else {
        // the question generating module can optionally supply the title
        // If this is not done, MoodleExporter will make up a title.
-       question.title = quizElement.problemType; 
+       question.title = "Change of Base";
     }
 
     // fr is done but there is more work to do to generate distractors for mc
