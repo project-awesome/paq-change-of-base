@@ -3,44 +3,43 @@ var chai = require("chai"),
 	expect = chai.expect,
 	randomStream = require("random-bits");
 
-var paqChangeOfBaseFR = require("../");
+var paqChangeOfBase = require("../");
 
 
 describe("generate(randomStream, params)", function() {
 	var genQInputsStub, genInputStub, genAnswerStub;
 	var rs, params, question;
 	beforeEach(function() {
-			genQInputsStub = sinon.stub(paqChangeOfBaseFR, 'generateQInputs')
+			genQInputsStub = sinon.stub(paqChangeOfBase, 'generateQInputs')
 								.returns("qInputs-double");
-			genQuestionTextStub = sinon.stub(paqChangeOfBaseFR, 'generateQuestionText')
+			genQuestionTextStub = sinon.stub(paqChangeOfBase, 'generateQuestionText')
 								.returns("questionText-double");
-			genAnswerStub = sinon.stub(paqChangeOfBaseFR, 'generateAnswer')
+			genAnswerStub = sinon.stub(paqChangeOfBase, 'generateAnswer')
 								.returns("answer-double");
 		    rs = new randomStream.random(7);
 			params = {};
-			question = paqChangeOfBaseFR.generate(rs, params);
+			question = paqChangeOfBase.generate(rs, params);
 	});
 	afterEach(function() {
 		genQInputsStub.restore();
 		genQuestionTextStub.restore();
 		genAnswerStub.restore();
 	});
-	describe('title', function() {
-		it('should equal the question module\'s title', function(){
-			expect(question.title).to.equal("Change of Base Free Response");
-			expect(question.title).to.equal(paqChangeOfBaseFR.title);
+	describe('problemType', function() {
+		it('should equal the question module\'s name', function(){
+			expect(question.problemType).to.equal("paq-change-of-base");
 		});
 	});
-	describe('format', function() {
-		it('should be "free-response"', function() {
-			expect(question.format).to.equal("free-response");
+	describe('outputType', function() {
+		it('should be one of "fr" or "mc"', function() {
+			expect(question.format).to.oneOf(["fr","mc"]);
 		});
 	});
-	describe('question', function() {
+	describe('questionText', function() {
 		it('should be what generateQuestionText returns', function() {
 			expect(genQInputsStub.calledWith(rs, params)).to.be.true;
 			expect(genQuestionTextStub.calledWith("qInputs-double")).to.be.true;
-			expect(question.question).to.equal("questionText-double");
+			expect(question.questionText).to.equal("questionText-double");
 		});
 	});
 	describe('answer', function() {

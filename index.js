@@ -253,7 +253,6 @@ exports.generate = function(randomStream, quizElement) {
        question.title = "Change of Base";
     }
 
-    // fr is done but there is more work to do to generate distractors for mc
     if (question.outputType == "mc") {
       var from = qInputs.numToConvert.toString(qInputs.fromRad);
       var answerAsString = qInputs.numToConvert.toString(qInputs.toRad);
@@ -272,6 +271,9 @@ exports.generate = function(randomStream, quizElement) {
       exports.formatChoices(choices, qInputs.fromRad, qInputs.toRad, qInputs.spaceBinary);
       question.distractors = choices;
       question.answerIndex =  choices.indexOf(answerAsString);
+      console.log("question": JSON.stringify(question));
+      console.log("choices": JSON.stringify(choices));
+      console.log("answerAsString": JSON.stringify(answerAsString));
     }
 
 	return question;
