@@ -268,12 +268,14 @@ exports.generate = function(randomStream, quizElement) {
       var choices = answerChoices.getChoices();
       randomStream.shuffle(choices);
 
+      question.answerIndex =  choices.indexOf(answerAsString);
       exports.formatChoices(choices, qInputs.fromRad, qInputs.toRad, qInputs.spaceBinary);
       question.distractors = choices;
       question.answerIndex =  choices.indexOf(answerAsString);
-      console.log("question:"+ JSON.stringify(question));
+     /* console.log("question:"+ JSON.stringify(question));
       console.log("choices:" +  JSON.stringify(choices));
       console.log("answerAsString:" +  JSON.stringify(answerAsString));
+     */
     }
 
 	return question;
