@@ -1,0 +1,26 @@
+{
+  "name": "paq-change-of-base",
+  "version": "0.0.0",
+  "description": "Project Awesome Question, Change of Base",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha --recursive"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MichelleCraig/paq-change-of-base.git"
+  },
+  "author": "Phill Conrad <pconrad@cs.ucsb.edu> (https://foo.cs.ucsb.edu/pawiki)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/project-awesome/paq-change-of-base/issues"
+  },
+  "homepage": "https://github.com/project-awesome/paq-change-of-base#readme",
+  "devDependencies": {
+    "ajv": "^3.8.3",
+    "chai": "^3.4.0",
+    "mocha": "^2.3.3",
+    "random-bits": "git+https://git@github.com/project-awesome/pa-random-bits.git#v1.0.0",
+    "sinon": "^1.17.2"
+  }
+}
